@@ -1,0 +1,125 @@
+class myClass{
+            constructor(){
+                console.log("constructor");
+                this.callPrint();
+            }
+            
+            callPrint(){
+                let c = 0;
+                console.log(c);
+            }
+        }
+        cl = new myClass();
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvasBubble" width="820" height="150" style="border:1px solid #d3d3d3;"></canvas>
+<form action="#" method="" name="b" id="but" class="form_class">
+    <input type="button" name="bubbleButton" id="bubbleButton" value="Ir" onclick="click()"/>
+</form>
+<script>
+var c = document.getElementById("canvasBubble");
+var context= c.getContext("2d");
+
+context.beginPath();
+context.lineWidth = "2";
+context.strokeStyle = "black";
+let list = [];
+let values = [];
+
+function init(x_0, y_0, actualContext){
+    actualContext.beginPath();
+    actualContext.lineWidth = "2";
+    actualContext.strokeStyle = "black";
+    list = [];
+    values = [];
+    for (let i = 0; i < 40; i++) {
+        let a =  Math.floor(Math.random() * 100);  
+        values.push(a);
+        list.push([x_0+20*i, y_0, 20, -a, i]);
+    }
+}
+
+function draw(){
+    list.forEach(element => {
+        context.rect(element[0],element[1], element[2], element[3]);
+        context.stroke();
+    });
+}
+
+init(5,140, context);
+draw();
+bubble(values);
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function colour(color, i){
+    context.beginPath();
+    context.fillStyle = color;
+    context.rect(list[i][0],list[i][1],list[i][2],list[i][3]);
+    context.fill();
+    context.lineWidth = "2";
+    context.strokeStyle = "black";
+    context.stroke();
+}
+
+async function clearColour(color, i){
+    context.beginPath();
+    context.fillStyle = color;
+    context.rect(list[i][0],list[i][1],list[i][2],list[i][3]);
+    context.fill();
+    context.lineWidth = "0";
+    context.strokeStyle = "white";
+    context.stroke();
+}
+
+async function swap(j, list){
+    colour("red", j);
+    colour("blue", j+1);
+    await sleep(5);
+    clearColour("white", j);
+    clearColour("white", j+1);
+    let temp2 = list[j+1][3];
+    list[j+1][3] = list[j][3];
+    list[j][3] = temp2;
+    context.lineWidth = "2";
+    context.strokeStyle = "black";
+    draw();
+    colour("white", j);
+    colour("blue", j+1);
+}
+
+async function bubble(array){
+    let temp = 0;
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < array.length-i-1; j++) {
+            if (array[j]>array[j+1]) {
+                swap(j, list);
+                temp = array[j];
+                array[j]=array[j+1];
+                array[j+1]=temp;
+            }            
+            await sleep(1);
+            colour("white", j);
+        }   
+        colour("green", array.length-1-i);
+    }
+}
+</script> 
+<br>
+<canvas id="canvasInsertion" width="820" height="150" style="border:1px solid #d3d3d3;"></canvas>
+<script>
+    var canvasInt = document.getElementById("canvasInsertion");
+    var contextInsertion= canvasInt.getContext("2d");
+    
+
+
+
+</script>
+
+</body>
+</html>
