@@ -2,14 +2,17 @@
 <html>
 <body>
 
-<canvas id="canvasBubble" width="820" height="150" style="border:1px solid #d3d3d3;"></canvas>
+<canvas id="canvasBubble" width="820" height="500" style="border:1px solid #d3d3d3;"></canvas>
 <form action="#" method="" name="b" id="but" class="form_class">
     <input type="button" name="bubbleButton" id="bubbleButton" value="bubble" onclick="clicked(0)"/>
     <input type="button" name="insertionButton" id="insertionButton" value="insertion" onclick="clicked(1)"/>
     <input type="button" name="selectionButton" id="selectionButton" value="selection" onclick="clicked(2)"/>
+    <input type="button" name="optimizedBubbleButton" id="optimizedBubbleButton" value="opt. bubble" onclick="clicked(3)"/>
 </form>
 
 <script>
+    //document.getElementById("bubbleButton").addEventListener("click", clicked(0));
+
     function clicked(n){
         switch (n) {
             case 0:
@@ -21,13 +24,15 @@
             case 2:
                 sorts = new selectionSort();
                 break;
+            case 3:
+                sorts = new modifiedBubbleSort();
+                break;
             default:
                 break;
         }
     }
 </script>
  <script>   
-    //Hacer herencia., merge no se visualiza bien con await
     let list = [];
     let values = [];
 
@@ -38,7 +43,7 @@
         actualList = [];
         actualValues = [];
         for (let i = 0; i < 40; i++) {
-            let a =  Math.floor(Math.random() * 100);  
+            let a =  Math.floor(Math.random() * 450);  
             actualValues.push(a);
             actualList.push([x_0+20*i, y_0, 20, -a, i]);
         }
@@ -76,21 +81,21 @@
         actualContext.stroke();
     }
 
-    class bubbleSort{
+    class base{
         constructor(){
             this.c = document.getElementById("canvasBubble");
             this.context = this.c.getContext("2d");
+            this.context.beginPath();
+            this.context.clearRect(0, 0, 820, 500); 
             this.list = [];
             this.values = [];
             this.context.beginPath();
             this.context.lineWidth = "2";
             this.context.strokeStyle = "black";
-            this.temp = init(5,140, this.context, this.list, this.values);
+            this.temp = init(5,490, this.context, this.list, this.values);
             this.list = this.temp[0];
             this.values = this.temp[1];
-            //console.log(this.list);
             draw(this.list, this.context);
-            this.bubble();
         }
 
         async swap(j){
@@ -108,13 +113,20 @@
             colour("white", j, this.context, this.list);
             colour("blue", j+1, this.context, this.list);
         }
+    }
+    
+    class bubbleSort extends base{
+        constructor(){
+            super();
+            this.bubble();
+        }
 
         async bubble(){
             let temp = 0;
             for (let i = 0; i < this.values.length; i++) {
                 for (let j = 0; j < this.values.length-i-1; j++) {
                     if (this.values[j]>this.values[j+1]) {
-                        this.swap(j);
+                        await super.swap(j);
                         temp = this.values[j];
                         this.values[j]=this.values[j+1];
                         this.values[j+1]=temp;
@@ -127,38 +139,44 @@
         }
     }
 
-    class insertionSort{
+    class modifiedBubbleSort extends base{
         constructor(){
-            this.canvas = document.getElementById("canvasBubble");
-            this.context= this.canvas.getContext("2d");
-            this.values = [];
-            this.list = [];
-            this.context.beginPath();
-            this.context.lineWidth = "2";
-            this.context.strokeStyle = "black";
-            this.temp = init(5,140, this.context, this.list, this.values);
-            this.list = this.temp[0];
-            this.values = this.temp[1];
-            console.log(this.values);
-            draw(this.list, this.context);
+            super();
+            this.modBubble();
+        }
+
+        async modBubble(){
+            let temp = 0;
+            let flag = false;
+            for (let i = 0; i < this.values.length; i++) {
+                flag = false;
+                for (let j = 0; j < this.values.length-i-1; j++) {
+                    if (this.values[j]>this.values[j+1]) {
+                        await super.swap(j);
+                        temp = this.values[j];
+                        this.values[j]=this.values[j+1];
+                        this.values[j+1]=temp;
+                        flag = true;
+                    }            
+                    await sleep(50);
+                    colour("white", j, this.context, this.list);
+                }   
+                if (flag==false){
+                    break;
+                }
+                colour("green", this.values.length-1-i, this.context, this.list);
+            }
+        }
+    }
+
+    class insertionSort extends base{
+        constructor(){
+            super();
             this.insertion()
         }
 
-        async swap(j){
-            colour("red", j, this.context, this.list);
-            colour("blue", j+1, this.context, this.list);
-            await sleep(50);
-            clearColour("white", j, this.context, this.list);
-            clearColour("white", j+1, this.context, this.list);
-            let temp2 = this.list[j+1][3];
-            this.list[j+1][3] = this.list[j][3];
-            this.list[j][3] = temp2;
-            this.context.lineWidth = "2";
-            this.context.strokeStyle = "black";
-            draw(this.list, this.context);
-            colour("white", j, this.context, this.list);
-            colour("blue", j+1, this.context, this.list);
-
+        async swapForThis(j){
+            await super.swap(j);
             for (let index = 0; index < j+1; index++) {
                 colour("green", index, this.context, this.list);               
             }
@@ -171,7 +189,7 @@
                 while (j>=0 && this.values[j]>key){ 
                     //c++;
                     this.values[j+1] = this.values[j];
-                    this.swap(j)
+                    await this.swapForThis(j)
                     await sleep(100);
                     colour("green", j+1, this.context, this.list);
                     j--;
@@ -181,24 +199,13 @@
         }
     }
 
-    class selectionSort{
+    class selectionSort extends base{
         constructor(){
-            this.c = document.getElementById("canvasBubble");
-            this.context = this.c.getContext("2d");
-            this.list = [];
-            this.values = [];
-            this.context.beginPath();
-            this.context.lineWidth = "2";
-            this.context.strokeStyle = "black";
-            this.temp = init(5,140, this.context, this.list, this.values);
-            this.list = this.temp[0];
-            this.values = this.temp[1];
-            //console.log(this.list);
-            draw(this.list, this.context);
+            super();
             this.selection();
         }
 
-        async swap(j, min){
+        async swapForThis(j, min){
             clearColour("white", j, this.context, this.list);
             clearColour("white", min, this.context, this.list);
             let temp2 = this.list[min][3];
@@ -233,7 +240,7 @@
                 let temp = this.values[min];
                 this.values[min] = this.values[i];
                 this.values[i]=temp;
-                this.swap(i, min);
+                this.swapForThis(i, min);
                 colour("green", i, this.context, this.list); 
             }      
             for (let index = 0; index < this.values.length; index++) {
