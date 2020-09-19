@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="soundButton">Audio</button>
+    <script>
+        document.getElementById("soundButton").addEventListener("click", play);
+
+        function play(){
+            let audio = new Audio('bensound-scifi.mp3');
+            audio.play();
+        }    
+    </script>
+</body>
+</html>

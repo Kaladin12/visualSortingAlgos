@@ -2,6 +2,11 @@
 <html>
 <body>
 
+<label for="swaps">Swaps: </label>
+<div id="swaps">0</div>   <br>
+<label for="comp">Comparisons: </label>
+<div id="comp">0</div>  
+
 <canvas id="canvasBubble" width="820" height="500" style="border:1px solid #d3d3d3;"></canvas>
 <form action="#" method="" name="b" id="but" class="form_class">
     <input type="button" name="bubbleButton" id="bubbleButton" value="bubble" onclick="clicked(0)"/>
@@ -92,16 +97,23 @@
             this.context.beginPath();
             this.context.lineWidth = "2";
             this.context.strokeStyle = "black";
+            this.swaps = 0;
+            this.comps = 0;
             this.temp = init(5,490, this.context, this.list, this.values);
             this.list = this.temp[0];
             this.values = this.temp[1];
             draw(this.list, this.context);
+            this.audio = new Audio('beep3.wav');
         }
 
         async swap(j){
+            this.swaps+=1;
+            document.getElementById("swaps").innerHTML = this.swaps;
+            this.play();
             colour("red", j, this.context, this.list);
             colour("blue", j+1, this.context, this.list);
             await sleep(50);
+            this.stop();
             clearColour("white", j, this.context, this.list);
             clearColour("white", j+1, this.context, this.list);
             let temp2 = this.list[j+1][3];
@@ -112,6 +124,14 @@
             draw(this.list, this.context);
             colour("white", j, this.context, this.list);
             colour("blue", j+1, this.context, this.list);
+        }
+
+        play(){
+            this.audio.play();
+        }
+
+        stop(){
+            this.audio.pause();
         }
     }
     
@@ -125,13 +145,15 @@
             let temp = 0;
             for (let i = 0; i < this.values.length; i++) {
                 for (let j = 0; j < this.values.length-i-1; j++) {
+                    this.comps +=1;
+                    document.getElementById("comp").innerHTML = this.comps;
                     if (this.values[j]>this.values[j+1]) {
                         await super.swap(j);
                         temp = this.values[j];
                         this.values[j]=this.values[j+1];
                         this.values[j+1]=temp;
                     }            
-                    await sleep(100);
+                    await sleep(50);
                     colour("white", j, this.context, this.list);
                 }   
                 colour("green", this.values.length-1-i, this.context, this.list);
@@ -151,14 +173,18 @@
             for (let i = 0; i < this.values.length; i++) {
                 flag = false;
                 for (let j = 0; j < this.values.length-i-1; j++) {
+                    this.comps +=1;
+                    document.getElementById("comp").innerHTML = this.comps;
                     if (this.values[j]>this.values[j+1]) {
                         await super.swap(j);
                         temp = this.values[j];
                         this.values[j]=this.values[j+1];
                         this.values[j+1]=temp;
                         flag = true;
-                    }            
+                    }    
+                    super.play();        
                     await sleep(50);
+                    super.stop();
                     colour("white", j, this.context, this.list);
                 }   
                 if (flag==false){
@@ -187,6 +213,8 @@
                 let key = this.values[i];
                 let j = i-1;
                 while (j>=0 && this.values[j]>key){ 
+                    this.comps +=1;
+                    document.getElementById("comp").innerHTML = this.comps;
                     //c++;
                     this.values[j+1] = this.values[j];
                     await this.swapForThis(j)
@@ -203,9 +231,12 @@
         constructor(){
             super();
             this.selection();
+            this.swaps = 0;
         }
 
         async swapForThis(j, min){
+            this.swaps += 1;
+            document.getElementById("swaps").innerHTML = this.swaps;
             clearColour("white", j, this.context, this.list);
             clearColour("white", min, this.context, this.list);
             let temp2 = this.list[min][3];
@@ -226,7 +257,11 @@
                     }
                     colour("red", j, this.context, this.list);
                     colour("yellow", min, this.context, this.list);
+                    super.play();
                     await sleep(50);
+                    super.stop();
+                    this.comps +=1;
+                    document.getElementById("comp").innerHTML = this.comps;
                     if (this.values[j]<this.values[min]){
                         colour("red", min, this.context, this.list);
                         min = j;

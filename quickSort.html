@@ -27,6 +27,16 @@
             });
         }
 
+        audio = new Audio('beep3.wav');
+
+        function play(){
+            audio.play();
+        }
+
+        function stop(){
+            audio.pause();
+        }
+
         c = document.getElementById("canvasBubble");
         context = c.getContext("2d");
         list = [];
@@ -85,7 +95,9 @@
         async function swap(i, j){
             colour("red", i, context, list);
             colour("blue", j, context, list);
+            play();
             await sleep(50);
+            stop();
             context.beginPath();
             context.clearRect(0, 0, 820, 150); 
             let temp = values[j];
